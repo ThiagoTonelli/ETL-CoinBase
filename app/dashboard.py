@@ -6,10 +6,8 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Carrega variáveis de ambiente do arquivo .env
 load_dotenv()
 
-# Lê as variáveis separadas do arquivo .env (sem SSL)
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
@@ -25,7 +23,7 @@ def ler_dados_postgres():
             password=POSTGRES_PASSWORD,
             port=POSTGRES_PORT
         )
-        query = "SELECT * FROM dados_bitcoin ORDER BY timestamp DESC"
+        query = "SELECT * FROM dados_bitcoin ORDER BY timestamp ASC"
         df = pd.read_sql(query, conn)
         conn.close()
         return df
@@ -43,12 +41,14 @@ def main():
     if not df.empty:
         st.subheader("📋 Dados Recentes")
         st.dataframe(df)
-
+        
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         df = df.sort_values(by='timestamp')
-        
+        df = df.loc[1:]
+
         st.subheader("📈 Evolução do Preço do Bitcoin")
-        st.line_chart(data=df, x='timestamp', y='valor', use_container_width=True)
+
+        st.line_chart(df.set_index('timestamp')['valor'])
 
         st.subheader("🔢 Estatísticas Gerais")
         col1, col2, col3 = st.columns(3)
