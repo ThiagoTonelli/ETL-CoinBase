@@ -1,2 +1,4 @@
 .venv/
+.logfire/
+__pycache__/
 .env
